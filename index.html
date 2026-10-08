@@ -80,6 +80,21 @@ const TPQ=["Baca Tulis Al-Qur'an",'Tajwid','Hafalan Surah','Fiqih','Doa Harian',
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const SEKOLAH='TPQ Irsyadul Ulum',ALAMAT="Jl. Cempaka Wa'duwa' Paseseh Tanjung Bumi Bangkalan";
 const uid=()=>Math.random().toString(36).slice(2,9);
+const API_URL='GANTI_DENGAN_URL_EXEC_ANDA';
+let PIN=null;
+const pin=()=>{
+ if(PIN===null){try{PIN=localStorage.getItem('raport_pin')}catch(e){}}
+ if(!PIN)PIN=prompt('Masukkan PIN akses:')||'';
+ return PIN;
+};
+async function api(action,data){
+ const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,token:pin(),data})});
+ const j=await r.json();
+ if(!j.ok){if(/PIN/.test(j.error||'')){PIN=null;try{localStorage.removeItem('raport_pin')}catch(e){}}throw new Error(j.error||'Gagal')}
+ try{localStorage.setItem('raport_pin',PIN)}catch(e){}
+ return j.data;
+}
+
 
 function seed(){
  const m=[['Pendidikan Agama',75],['Pendidikan Pancasila',75],['Bahasa Indonesia',75],['Matematika',70],['IPA',70],['Bahasa Inggris',70]].map(([nama,kkm])=>({id:uid(),nama,kkm}));
@@ -93,7 +108,16 @@ function migrate(){S.rombel=S.rombel||[];S.siswa.forEach(s=>{if(!s.kelas)s.kelas
 migrate();
 let tab='sekolah',sel=S.siswa[0]?.id||null,fk='Semua';
 let tm=null;
-const save=()=>{st('Menyimpan...');clearTimeout(tm);tm=setTimeout(()=>{google.script.run.withSuccessHandler(()=>st('Tersimpan')).withFailureHandler(e=>st('Gagal menyimpan: '+e.message)).saveData(JSON.stringify(S))},900)};
+let saving=false,pending=false,loaded=false;
+const save=()=>{if(!loaded)return;st('Menyimpan...');clearTimeout(tm);tm=setTimeout(flush,900)};
+async function flush(){
+ if(saving){pending=true;return}
+ saving=true;
+ try{await api('save',JSON.stringify(S));st('Tersimpan')}
+ catch(e){st('Gagal menyimpan: '+e.message)}
+ saving=false;
+ if(pending){pending=false;flush()}
+}
 const kelasList=()=>S.rombel.map(k=>k.nama);
 const waliOf=n=>(S.rombel.find(k=>k.nama===n)||{}).wali||'-';
 const kelasOpts=v=>kelasList().map(k=>`<option ${k===v?'selected':''}>${esc(k)}</option>`).join('');
@@ -220,13 +244,21 @@ document.addEventListener('click',e=>{
  else if(b.id==='reset'){load()}
 });
 const st=x=>{const e=document.getElementById('st');if(e)e.textContent=x};
-function load(){st('Memuat...');
- google.script.run.withSuccessHandler(res=>{
+async function load(){
+ st('Memuat...');
+ try{
+  const res=await api('get');
   let d=res?JSON.parse(res):null;
   if(!d||!d.school){d=seed();d.siswa=[];d.rombel=[];d.mapel.forEach((m,i)=>{m.nama=TPQ[i];m.kkm=70});d.school.kepsek='';d.school.nipKepsek='';d.school.wali='';d.school.nipWali=''}
-  S=d;migrate();fk='Semua';sel=S.siswa[0]?S.siswa[0].id:null;view();st('Data dimuat');
- }).withFailureHandler(e=>{document.getElementById('main').innerHTML='<div class="card">Gagal memuat data: '+esc(e.message)+'</div>'}).getData();}
+  S=d;migrate();fk='Semua';sel=S.siswa[0]?S.siswa[0].id:null;loaded=true;view();st('Data dimuat');
+ }catch(e){
+  loaded=false;
+  document.getElementById('main').innerHTML='<div class="card">Gagal memuat data: '+esc(e.message)+'. Periksa URL Apps Script dan PIN, lalu klik "Muat ulang".</div>';
+  st('');
+ }
+}
 load();
+
 </script>
 </body>
 </html>
