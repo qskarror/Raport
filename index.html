@@ -80,8 +80,8 @@ const TPQ=["Baca Tulis Al-Qur'an",'Tajwid','Hafalan Surah','Fiqih','Doa Harian',
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const SEKOLAH='TPQ Irsyadul Ulum',ALAMAT="Jl. Cempaka Wa'duwa' Paseseh Tanjung Bumi Bangkalan";
 const uid=()=>Math.random().toString(36).slice(2,9);
-const API_URL='GANTI_DENGAN_URL_EXEC_ANDA';
-let PIN=null;
+const API_URL='https://script.google.com/macros/s/AKfycbwJhOmcFVZSpS6dpthxpv-ztXxNg7_RvDbIVHuF0AXCuBkO9TqTHB0REnT2ctVkn0ru/exec';
+let PIN=1234;
 const pin=()=>{
  if(PIN===null){try{PIN=localStorage.getItem('raport_pin')}catch(e){}}
  if(!PIN)PIN=prompt('Masukkan PIN akses:')||'';
