@@ -134,13 +134,14 @@ const icons = {
   kelas: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`
 };
 
-// Urutan tab sesuai permintaan (Kiri ke Kanan di Mobile)
+// Urutan tab dibalik agar dari Kanan ke Kiri: 
+// Sekolah & Mapel (Kanan) <--- Input Nilai <--- Cetak <--- Siswa <--- Data Kelas (Kiri)
 const TABS=[
-  ['sekolah', 'Sekolah & Mapel', icons.sekolah],
-  ['nilai', 'Input Nilai', icons.nilai],
-  ['cetak', 'Cetak Raport', icons.cetak],
+  ['kelas', 'Data Kelas', icons.kelas],
   ['siswa', 'Data Siswa', icons.siswa],
-  ['kelas', 'Data Kelas', icons.kelas]
+  ['cetak', 'Cetak Raport', icons.cetak],
+  ['nilai', 'Input Nilai', icons.nilai],
+  ['sekolah', 'Sekolah & Mapel', icons.sekolah]
 ];
 
 const TPQ=["Baca Tulis Al-Qur'an",'Tajwid','Hafalan Surah','Fiqih','Doa Harian','Akhlak'];
